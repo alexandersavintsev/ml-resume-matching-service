@@ -63,9 +63,7 @@ services:
       - backend
     ports:
       - "8001:8000"
-    command: >
-      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
-      && uvicorn mq.publisher_api:app --host 0.0.0.0 --port 8000"
+    command: ["uvicorn", "mq.publisher_api:app", "--host", "0.0.0.0", "--port", "8000"]
 
   worker-1:
     build:
@@ -79,9 +77,7 @@ services:
       - rabbitmq
     networks:
       - backend
-    command: >
-      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
-      && python -m mq.worker --worker-id worker-1"
+    command: ["uvicorn", "mq.publisher_api:app", "--host", "0.0.0.0", "--port", "8000"]
 
   worker-2:
     build:
@@ -95,9 +91,7 @@ services:
       - rabbitmq
     networks:
       - backend
-    command: >
-      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
-      && python -m mq.worker --worker-id worker-2"
+    command: ["uvicorn", "mq.publisher_api:app", "--host", "0.0.0.0", "--port", "8000"]
 
 networks:
   backend:
