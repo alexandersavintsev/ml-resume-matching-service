@@ -12,6 +12,8 @@ services:
       - rabbitmq
     networks:
       - backend
+    ports:
+      - "8000:8000"
 
   web-proxy:
     image: nginx:1.27-alpine
