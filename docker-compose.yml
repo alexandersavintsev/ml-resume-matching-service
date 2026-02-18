@@ -68,10 +68,9 @@ services:
   worker-1:
     build:
       context: ./app
+      dockerfile: Dockerfile.worker
     env_file:
       - ./app/.env
-    volumes:
-      - ./app/src:/app/src
     depends_on:
       - database
       - rabbitmq
@@ -82,10 +81,9 @@ services:
   worker-2:
     build:
       context: ./app
+      dockerfile: Dockerfile.worker
     env_file:
       - ./app/.env
-    volumes:
-      - ./app/src:/app/src
     depends_on:
       - database
       - rabbitmq
