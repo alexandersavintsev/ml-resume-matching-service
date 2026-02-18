@@ -49,6 +49,56 @@ services:
     networks:
       - backend
 
+  publisher:
+    build:
+      context: ./app
+    env_file:
+      - ./app/.env
+    volumes:
+      - ./app/src:/app/src
+    depends_on:
+      - database
+      - rabbitmq
+    networks:
+      - backend
+    ports:
+      - "8001:8000"
+    command: >
+      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
+      && uvicorn mq.publisher_api:app --host 0.0.0.0 --port 8000"
+
+  worker-1:
+    build:
+      context: ./app
+    env_file:
+      - ./app/.env
+    volumes:
+      - ./app/src:/app/src
+    depends_on:
+      - database
+      - rabbitmq
+    networks:
+      - backend
+    command: >
+      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
+      && python -m mq.worker --worker-id worker-1"
+
+  worker-2:
+    build:
+      context: ./app
+    env_file:
+      - ./app/.env
+    volumes:
+      - ./app/src:/app/src
+    depends_on:
+      - database
+      - rabbitmq
+    networks:
+      - backend
+    command: >
+      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
+      && python -m mq.worker --worker-id worker-2"
+
 networks:
   backend:
     driver: bridge
@@ -56,3 +106,7 @@ networks:
 volumes:
   postgres_volume:
   rabbitmq_volume:
+
+    command: >
+      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
+      && python -m mq.worker --worker-id worker-2"
