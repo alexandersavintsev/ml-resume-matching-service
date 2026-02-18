@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r /worker/requirements-worker.txt
 # копируем только нужный код (mq + infra)
 COPY src/infra /worker/infra
 COPY src/mq /worker/mq
+COPY src/services /worker/services
 
 # чтобы работали абсолютные импорты типа `infra...`
 ENV PYTHONPATH=/worker
