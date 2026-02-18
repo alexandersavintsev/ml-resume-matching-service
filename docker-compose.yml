@@ -107,6 +107,6 @@ volumes:
   postgres_volume:
   rabbitmq_volume:
 
-    command: >
-      sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
-      && python -m mq.worker --worker-id worker-2"
+command: >
+  sh -c "pip install --no-cache-dir -r /app/requirements-mq.txt
+  && python -m mq.worker --worker-id worker-2"
