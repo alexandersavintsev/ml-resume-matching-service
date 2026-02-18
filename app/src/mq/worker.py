@@ -9,6 +9,7 @@ from uuid import UUID
 
 import pika
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from infra.db.database import get_session
 from infra.db.models import RequestStatusEnum
@@ -16,6 +17,7 @@ from services.history_service import add_history_item, mark_task_completed
 from mq.rabbit import create_connection, declare_queue
 from mq.schemas import MLTaskMessage, WorkerResult
 from mq.settings import RABBITMQ_QUEUE
+
 
 
 CREATE_RESULTS_TABLE_SQL = """
@@ -49,6 +51,8 @@ def ensure_results_table() -> None:
     try:
         session.execute(text(CREATE_RESULTS_TABLE_SQL))
         session.commit()
+    except IntegrityError:
+        session.rollback()
     finally:
         session.close()
 
