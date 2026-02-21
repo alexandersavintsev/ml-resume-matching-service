@@ -38,6 +38,14 @@ services:
       - rabbitmq_volume:/var/lib/rabbitmq
     networks:
       - backend
+    environment:
+      RABBITMQ_DEFAULT_USER: ml_rabbit
+      RABBITMQ_DEFAULT_PASS: ml_rabbit_pass
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   database:
     image: postgres:16
@@ -75,8 +83,11 @@ services:
     env_file:
       - ./app/.env
     depends_on:
-      - database
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_started
+    restart: on-failure
     networks:
       - backend
     command: ["python", "-m", "mq.worker", "--worker-id", "worker-1"]
@@ -88,8 +99,11 @@ services:
     env_file:
       - ./app/.env
     depends_on:
-      - database
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_started
+    restart: on-failure
     networks:
       - backend
     command: ["python", "-m", "mq.worker", "--worker-id", "worker-2"]
@@ -101,3 +115,4 @@ networks:
 volumes:
   postgres_volume:
   rabbitmq_volume:
+
