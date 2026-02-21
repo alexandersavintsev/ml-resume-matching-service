@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+{% block page %}register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-3">Регистрация</h1>
+
+        <form id="registerForm">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" type="email" name="email" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Роль</label>
+            <select class="form-select" name="role">
+              <option value="employer" selected>employer</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Начальные кредиты</label>
+            <input class="form-control" type="number" name="initial_credits" value="0" min="0" max="1000000" />
+          </div>
+
+          <button class="btn btn-success w-100" type="submit" id="registerBtn">Создать аккаунт</button>
+        </form>
+
+        <div class="text-muted small mt-3">
+          Уже есть аккаунт? <a href="/login">Вход</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
