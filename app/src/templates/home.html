@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Главная — ML Service{% endblock %}
+{% block page %}home{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h3">Личный кабинет ML-сервиса</h1>
+        <p class="text-muted mb-2">
+          Веб-интерфейс работает поверх существующего backend API и не дублирует бизнес-логику.
+        </p>
+
+        <h2 class="h5 mt-4">Что “предсказываем”</h2>
+        <p>
+          Сервис выполняет <b>ранжирование резюме</b> под запрос работодателя по ключевым словам и возвращает
+          <b>Top-K</b> наиболее релевантных резюме с оценкой <code>score</code> (0..1).
+        </p>
+        <div class="alert alert-info mb-0">
+          Учебная версия использует baseline-алгоритм: доля ключевых слов, найденных в тексте резюме (case-insensitive).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5">Быстрый старт</h2>
+        <ol class="mb-0">
+          <li><a href="/register">Зарегистрируйся</a></li>
+          <li><a href="/login">Войди</a></li>
+          <li><a href="/cabinet">Пополнить баланс</a></li>
+          <li><a href="/predict-ui">Отправить ML-запрос</a></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
