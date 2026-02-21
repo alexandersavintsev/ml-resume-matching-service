@@ -42,3 +42,4 @@ def declare_queue(channel):
         durable=True,
     )
 
+
