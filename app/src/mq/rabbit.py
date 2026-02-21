@@ -1,28 +1,44 @@
-from __future__ import annotations
-
+import os
+import time
 import pika
 
-from mq.settings import (
-    RABBITMQ_HOST,
-    RABBITMQ_PORT,
-    RABBITMQ_USER,
-    RABBITMQ_PASSWORD,
-    RABBITMQ_QUEUE,
-)
 
+def create_connection():
+    host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+    port = int(os.getenv("RABBITMQ_PORT", "5672"))
+    user = os.getenv("RABBITMQ_USER", "guest")
+    password = os.getenv("RABBITMQ_PASSWORD", "guest")
 
-def create_connection() -> pika.BlockingConnection:
-    creds = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
+    creds = pika.PlainCredentials(user, password)
+
     params = pika.ConnectionParameters(
-        host=RABBITMQ_HOST,
-        port=RABBITMQ_PORT,
+        host=host,
+        port=port,
         credentials=creds,
         heartbeat=30,
         blocked_connection_timeout=30,
+        connection_attempts=1,   # retries делаем сами
+        socket_timeout=5,
     )
-    return pika.BlockingConnection(params)
+
+    last_err = None
+
+    # retry loop — ждём пока rabbitmq реально поднимется
+    for _ in range(20):
+        try:
+            return pika.BlockingConnection(params)
+        except Exception as e:
+            last_err = e
+            time.sleep(2)
+
+    raise last_err
 
 
-def declare_queue(channel: pika.channel.Channel) -> None:
-    # durable=True чтобы сообщения переживали рестарт брокера (при persistent publish)
-    channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
+def declare_queue(channel):
+    queue_name = os.getenv("RABBITMQ_QUEUE", "ml_tasks")
+
+    channel.queue_declare(
+        queue=queue_name,
+        durable=True,
+    )
+
