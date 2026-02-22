@@ -1,35 +1,33 @@
 {% extends "base.html" %}
-{% block title %}История{% endblock %}
-{% block page %}history{% endblock %}
+{% block title %}История — ML Service{% endblock %}
 
 {% block content %}
-<div class="row g-4">
+<div id="historyRoot" class="row g-4">
   <div class="col-12">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h1 class="h4">История операций и предсказаний</h1>
-        <p class="text-muted mb-0">Данные берутся из backend: /history/transactions и /history/predictions.</p>
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="kicker mb-2"><i class="bi bi-clock-history"></i><span>Audit</span></div>
+        <h3 class="fw-bold mb-1">История операций и предсказаний</h3>
+        <div class="text-muted">Транзакции и запросы берём из backend через API.</div>
       </div>
     </div>
   </div>
 
   <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="h5">Транзакции</h2>
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="fw-semibold mb-2">Transactions</div>
         <div class="table-responsive">
-          <table class="table table-sm">
+          <table class="table table-sm align-middle">
             <thead>
               <tr>
                 <th>Дата</th>
                 <th>Тип</th>
-                <th>Сумма</th>
+                <th>Amount</th>
                 <th>Task</th>
               </tr>
             </thead>
-            <tbody id="txBody">
-              <tr><td colspan="4" class="text-muted">Загрузка…</td></tr>
-            </tbody>
+            <tbody id="txTable"></tbody>
           </table>
         </div>
       </div>
@@ -37,30 +35,26 @@
   </div>
 
   <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="h5">ML-запросы</h2>
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="fw-semibold mb-2">Predictions</div>
         <div class="table-responsive">
-          <table class="table table-sm">
+          <table class="table table-sm align-middle">
             <thead>
               <tr>
                 <th>Дата</th>
-                <th>Статус</th>
-                <th>Списано</th>
                 <th>Task</th>
+                <th>Charged</th>
+                <th>Status</th>
+                <th>Invalid</th>
               </tr>
             </thead>
-            <tbody id="predBody">
-              <tr><td colspan="4" class="text-muted">Загрузка…</td></tr>
-            </tbody>
+            <tbody id="predTable"></tbody>
           </table>
-        </div>
-
-        <div class="small text-muted mt-2">
-          Подсказка: статус <code>partially_valid</code> означает, что часть данных была отклонена (см. invalid_items в API).
         </div>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
+
