@@ -1,46 +1,72 @@
 {% extends "base.html" %}
-{% block title %}Кабинет{% endblock %}
-{% block page %}cabinet{% endblock %}
+{% block title %}Кабинет — ML Service{% endblock %}
 
 {% block content %}
 <div class="row g-4">
-  <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h1 class="h4">Личный кабинет</h1>
-        <p class="text-muted mb-3">Баланс хранится на backend, UI только отображает и инициирует операции.</p>
-
-        <div class="d-flex align-items-center gap-3">
-          <div class="badge text-bg-dark p-3">
-            Баланс: <span class="fs-5" id="balanceValue">—</span> credits
+  <div class="col-lg-7">
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <div class="kicker mb-2"><i class="bi bi-person-badge"></i><span>Dashboard</span></div>
+            <h3 class="fw-bold mb-1">Личный кабинет</h3>
+            <div class="text-muted">Баланс хранится и управляется на backend. UI только отображает и инициирует операции.</div>
           </div>
-          <button class="btn btn-outline-secondary" id="refreshBalanceBtn" type="button">Обновить</button>
+          <div class="badgex">
+            <i class="bi bi-coin"></i>
+            <span id="balanceMini" class="fw-semibold">—</span>
+          </div>
         </div>
 
-        <hr />
+        <div class="hr-soft"></div>
 
-        <h2 class="h6">Пополнение</h2>
-        <form id="topUpForm" class="row g-2 align-items-end">
-          <div class="col-8">
-            <label class="form-label">Сумма</label>
-            <input class="form-control" type="number" name="amount" value="10" min="1" max="1000000" required />
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="cardx" style="box-shadow:none">
+              <div class="cardx-body">
+                <div class="text-muted small">Текущий баланс</div>
+                <div class="display-6 fw-bold mb-2" id="balanceValue">—</div>
+                <div class="text-muted small">Кредиты списываются только при успешном ML-запросе.</div>
+              </div>
+            </div>
           </div>
-          <div class="col-4 d-grid">
-            <button class="btn btn-primary" type="submit" id="topUpBtn">Пополнить</button>
-          </div>
-        </form>
 
+          <div class="col-md-6">
+            <div class="cardx" style="box-shadow:none">
+              <div class="cardx-body">
+                <div class="fw-semibold mb-2">Пополнение</div>
+                <form id="topUpForm" class="d-grid gap-2">
+                  <input id="topupAmount" class="form-control" type="number" min="1" max="1000000" value="50"/>
+                  <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-plus-circle me-1"></i> Пополнить
+                  </button>
+                </form>
+                <div class="text-muted small mt-2">Эквайринг не нужен — просто фикс/ввод суммы.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr-soft"></div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-primary" href="/predict"><i class="bi bi-cpu me-1"></i> ML-запрос</a>
+          <a class="btn btn-ghost" href="/history"><i class="bi bi-clock-history me-1"></i> История</a>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="h5">Быстрые действия</h2>
+  <div class="col-lg-5">
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="fw-semibold mb-2">Статус системы</div>
+        <div class="text-muted small mb-3">Если UI грузится, но запросы падают — проверь токен и сервисы.</div>
+
         <div class="d-grid gap-2">
-          <a class="btn btn-success" href="/predict-ui">Сделать ML-запрос</a>
-          <a class="btn btn-outline-dark" href="/history-ui">Открыть историю</a>
+          <div class="badgex"><i class="bi bi-heart-pulse me-1"></i> health: <span class="code-pill">/health</span></div>
+          <div class="badgex"><i class="bi bi-braces me-1"></i> swagger: <span class="code-pill">/docs</span></div>
+          <div class="badgex"><i class="bi bi-shield-lock me-1"></i> auth: <span class="code-pill">Bearer</span></div>
         </div>
       </div>
     </div>
