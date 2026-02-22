@@ -2,45 +2,105 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}ML Resume Matching{% endblock %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}ML Service{% endblock %}</title>
 
-  <!-- Bootstrap 5 -->
+  <!-- Bootstrap + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <link href="/static/styles.css" rel="stylesheet">
+  <!-- Your styles -->
+  <link rel="stylesheet" href="/static/styles.css" />
+
+  {% block head %}{% endblock %}
 </head>
-<body data-page="{% block page %}{% endblock %}">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/">ML Service</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
 
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
-        <li class="nav-item"><a class="nav-link" href="/cabinet">Кабинет</a></li>
-        <li class="nav-item"><a class="nav-link" href="/predict-ui">ML-запрос</a></li>
-        <li class="nav-item"><a class="nav-link" href="/history-ui">История</a></li>
-      </ul>
+<body>
+  <!-- Ambient background -->
+  <div class="ambient">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
 
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="/register">Регистрация</a></li>
-        <li class="nav-item"><a class="nav-link" href="/login">Вход</a></li>
-        <li class="nav-item"><a class="nav-link" href="/logout">Выход</a></li>
-      </ul>
+  <!-- Topbar -->
+  <header class="topbar">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand brand" href="/">
+          <span class="brand-mark">◼</span>
+          <span>ML Service</span>
+          <span class="brand-badge">beta</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav me-auto gap-lg-2">
+            <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+            <li class="nav-item nav-auth-only d-none"><a class="nav-link" href="/cabinet">Кабинет</a></li>
+            <li class="nav-item nav-auth-only d-none"><a class="nav-link" href="/predict">ML-запрос</a></li>
+            <li class="nav-item nav-auth-only d-none"><a class="nav-link" href="/history">История</a></li>
+          </ul>
+
+          <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-ghost btn-sm nav-guest-only" href="/register">Регистрация</a>
+            <a class="btn btn-primary btn-sm nav-guest-only" href="/login">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Вход
+            </a>
+
+            <button class="btn btn-ghost btn-sm nav-auth-only d-none" id="logoutBtn" type="button">
+              <i class="bi bi-box-arrow-right me-1"></i> Выход
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Toasts -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div id="appToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="me-auto" id="toastTitle">ML Service</strong>
+        <small class="text-muted" id="toastMeta"></small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="toastBody">...</div>
     </div>
   </div>
-</nav>
 
-<main class="container my-4">
-  <div id="globalAlert"></div>
-  {% block content %}{% endblock %}
-</main>
+  <footer class="footer">
+    <div class="container">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-2">
+        <div class="text-muted">
+          <div class="fw-semibold text-white-50">ML Resume Ranking Service</div>
+          <div class="small">Учебный личный кабинет поверх FastAPI backend. Без дублирования бизнес-логики.</div>
+        </div>
+        <div class="small text-muted">
+          <span class="me-2">ASGI • FastAPI • Jinja2</span>
+          <span class="dot"></span>
+          <span class="ms-2">v1</span>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/static/app.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Your app JS -->
+  <script src="/static/app.js"></script>
+
+  {% block scripts %}{% endblock %}
 </body>
 </html>
