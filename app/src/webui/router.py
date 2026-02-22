@@ -29,12 +29,12 @@ def cabinet_page(request: Request):
     return templates.TemplateResponse("cabinet.html", {"request": request})
 
 
-@router.get("/predict-ui")
+@router.get("/predict")
 def predict_page(request: Request):
     return templates.TemplateResponse("predict.html", {"request": request})
 
 
-@router.get("/history-ui")
+@router.get("/history")
 def history_page(request: Request):
     return templates.TemplateResponse("history.html", {"request": request})
 
