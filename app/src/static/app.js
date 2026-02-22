@@ -1,344 +1,268 @@
-function getCookie(name) {
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : null;
+// ====== Token storage ======
+const TOKEN_KEY = "ml_token";
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
 }
 
-function setCookie(name, value) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax`;
+// ====== UI helpers ======
+function $(sel) { return document.querySelector(sel); }
+function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+
+function applyAuthVisibility() {
+  const has = !!getToken();
+  $all(".nav-auth-only").forEach(el => el.classList.toggle("d-none", !has));
+  $all(".nav-guest-only").forEach(el => el.classList.toggle("d-none", has));
 }
 
-function clearCookie(name) {
-  document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+function toast(title, body, meta="") {
+  const t = $("#appToast");
+  if (!t) return alert(body);
+  $("#toastTitle").textContent = title;
+  $("#toastBody").textContent = body;
+  $("#toastMeta").textContent = meta;
+  const instance = bootstrap.Toast.getOrCreateInstance(t, { delay: 4500 });
+  instance.show();
 }
 
-function token() {
-  return getCookie("access_token");
+function formatError(e) {
+  // FastAPI errors are like: { detail: { error: { code, message, details } } }
+  if (!e) return "Unknown error";
+  if (typeof e === "string") return e;
+  if (e.message) return e.message;
+  return JSON.stringify(e);
 }
 
-function requireAuth() {
-  if (!token()) {
-    window.location.href = "/login";
-    return false;
-  }
-  return true;
-}
+// ====== API client ======
+async function apiFetch(path, { method="GET", body=null } = {}) {
+  const headers = { "Content-Type": "application/json" };
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-function showGlobalAlert(kind, title, message, details) {
-  const root = document.getElementById("globalAlert");
-  if (!root) return;
-
-  const det = details ? `<pre class="mt-2 mb-0 small bg-light p-2 rounded">${escapeHtml(JSON.stringify(details, null, 2))}</pre>` : "";
-  root.innerHTML = `
-    <div class="alert alert-${kind} alert-dismissible fade show" role="alert">
-      <div class="fw-semibold">${escapeHtml(title)}</div>
-      <div>${escapeHtml(message || "")}</div>
-      ${det}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  `;
-}
-
-function escapeHtml(s) {
-  return String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-}
-
-async function apiFetch(path, options = {}) {
-  const headers = Object.assign(
-    { "Content-Type": "application/json" },
-    options.headers || {}
-  );
-
-  const t = token();
-  if (t) headers["Authorization"] = `Bearer ${t}`;
-
-  const res = await fetch(path, Object.assign({}, options, { headers }));
-
-  if (res.ok) {
-    const ct = res.headers.get("content-type") || "";
-    if (ct.includes("application/json")) return await res.json();
-    return await res.text();
-  }
-
-  // parse backend error format: {detail: {error: {code,message,details}}}
-  let payload = null;
-  try {
-    payload = await res.json();
-  } catch (_) {}
-
-  const err = payload?.detail?.error;
-  const code = err?.code || "HTTP_ERROR";
-  const message = err?.message || `Request failed with status ${res.status}`;
-  const details = err?.details || null;
-
-  const e = new Error(message);
-  e.status = res.status;
-  e.code = code;
-  e.details = details;
-  throw e;
-}
-
-// ---------- Pages ----------
-
-async function initLogin() {
-  const form = document.getElementById("loginForm");
-  const btn = document.getElementById("loginBtn");
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    btn.disabled = true;
-
-    try {
-      const fd = new FormData(form);
-      const email = fd.get("email");
-
-      const data = await apiFetch("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email })
-      });
-
-      setCookie("access_token", data.token);
-      showGlobalAlert("success", "Успешный вход", "Токен сохранён, переходим в кабинет.");
-      setTimeout(() => (window.location.href = "/cabinet"), 400);
-    } catch (err) {
-      showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
-    } finally {
-      btn.disabled = false;
-    }
+  const res = await fetch(path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : null
   });
-}
 
-async function initRegister() {
-  const form = document.getElementById("registerForm");
-  const btn = document.getElementById("registerBtn");
-  if (!form) return;
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    btn.disabled = true;
-
-    try {
-      const fd = new FormData(form);
-      const email = fd.get("email");
-      const role = fd.get("role");
-      const initial_credits = Number(fd.get("initial_credits") || 0);
-
-      const data = await apiFetch("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ email, role, initial_credits })
-      });
-
-      showGlobalAlert("success", "Аккаунт создан", `user_id=${data.user_id}. Теперь выполните вход.`);
-      setTimeout(() => (window.location.href = "/login"), 600);
-    } catch (err) {
-      showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
-    } finally {
-      btn.disabled = false;
-    }
-  });
-}
-
-async function loadBalanceInto(elId) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-
-  const data = await apiFetch("/balance", { method: "GET" });
-  el.textContent = String(data.credits);
-}
-
-async function initCabinet() {
-  if (!requireAuth()) return;
-
-  const refreshBtn = document.getElementById("refreshBalanceBtn");
-  const form = document.getElementById("topUpForm");
-  const btn = document.getElementById("topUpBtn");
-
-  async function refresh() {
-    try {
-      await loadBalanceInto("balanceValue");
-    } catch (err) {
-      showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
-    }
+  if (!res.ok) {
+    const err = data?.detail?.error || data?.error || { message: "Request failed" };
+    const message = err.message || "Request failed";
+    const code = err.code || `HTTP_${res.status}`;
+    const details = err.details ? JSON.stringify(err.details) : "";
+    const full = `${code}: ${message}${details ? " • " + details : ""}`;
+    throw new Error(full);
   }
 
-  refreshBtn?.addEventListener("click", refresh);
-  await refresh();
-
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    btn.disabled = true;
-
-    try {
-      const fd = new FormData(form);
-      const amount = Number(fd.get("amount"));
-      const data = await apiFetch("/balance/top-up", {
-        method: "POST",
-        body: JSON.stringify({ amount })
-      });
-      showGlobalAlert("success", "Баланс пополнен", `Новый баланс: ${data.new_balance}`);
-      await refresh();
-    } catch (err) {
-      showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
-    } finally {
-      btn.disabled = false;
-    }
-  });
+  return data;
 }
 
-function parseKeywords(s) {
-  return String(s)
-    .split(",")
-    .map(x => x.trim())
-    .filter(Boolean);
-}
+// ====== Pages ======
+document.addEventListener("DOMContentLoaded", () => {
+  applyAuthVisibility();
 
-function parseResumes(text) {
-  // one resume per line
-  return String(text)
-    .split("\n")
-    .map(x => x.trim())
-    // keep even empty lines? backend will mark invalid; we can keep empties to demonstrate validation
-    // but to show partially_valid better, keep them as-is:
-    .map(x => x); 
-}
-
-function renderPredictResult(data) {
-  const meta = document.getElementById("predictMeta");
-  const invalidBlock = document.getElementById("invalidBlock");
-  const invalidList = document.getElementById("invalidList");
-  const tbody = document.getElementById("predictTableBody");
-
-  if (meta) {
-    meta.textContent = `task_id=${data.task_id} | status=${data.status} | charged_credits=${data.charged_credits}`;
+  const logoutBtn = $("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      clearToken();
+      applyAuthVisibility();
+      toast("Выход", "Токен удалён. Вы вышли из системы.");
+      window.location.href = "/";
+    });
   }
 
-  const invalid = data.invalid_items || [];
-  if (invalid.length > 0) {
-    invalidBlock.style.display = "";
-    invalidList.innerHTML = invalid.map(x => `<li><code>${escapeHtml(x)}</code></li>`).join("");
-  } else {
-    invalidBlock.style.display = "none";
-    invalidList.innerHTML = "";
-  }
+  // LOGIN
+  const loginForm = $("#loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#loginEmail").value.trim();
 
-  const top = data.top || [];
-  if (top.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-muted">Пусто</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = top.map((item, idx) => `
-    <tr>
-      <td>${idx + 1}</td>
-      <td><span class="badge text-bg-secondary">${Number(item.score).toFixed(3)}</span></td>
-      <td class="small">${escapeHtml(item.resume_text)}</td>
-    </tr>
-  `).join("");
-}
-
-async function initPredict() {
-  if (!requireAuth()) return;
-
-  const refreshBtn = document.getElementById("predictRefreshBalanceBtn");
-  const form = document.getElementById("predictForm");
-  const btn = document.getElementById("predictBtn");
-
-  async function refreshBalance() {
-    try {
-      await loadBalanceInto("predictBalance");
-    } catch (err) {
-      showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
-    }
-  }
-
-  refreshBtn?.addEventListener("click", refreshBalance);
-  await refreshBalance();
-
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    btn.disabled = true;
-
-    try {
-      const fd = new FormData(form);
-      const keywords = parseKeywords(fd.get("keywords"));
-      const resumes = parseResumes(fd.get("resumes"));
-      const top_k = Number(fd.get("top_k") || 5);
-      const cost_credits = Number(fd.get("cost_credits") || 10);
-
-      const data = await apiFetch("/predict", {
-        method: "POST",
-        body: JSON.stringify({ keywords, resumes, top_k, cost_credits })
-      });
-
-      showGlobalAlert("success", "Успешно", `Статус: ${data.status}`);
-      renderPredictResult(data);
-      await refreshBalance();
-    } catch (err) {
-      // special message for insufficient balance
-      if (err.code === "INSUFFICIENT_BALANCE") {
-        showGlobalAlert("warning", err.code, "Недостаточно средств на балансе.", err.details);
-      } else {
-        showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
+      try {
+        const data = await apiFetch("/auth/login", { method: "POST", body: { email } });
+        setToken(data.token);
+        applyAuthVisibility();
+        toast("Успех", "Вы вошли в систему.", "auth");
+        window.location.href = "/cabinet";
+      } catch (err) {
+        toast("Ошибка входа", formatError(err));
       }
-    } finally {
-      btn.disabled = false;
-    }
-  });
-}
-
-function fmtDate(s) {
-  // ISO -> readable
-  const d = new Date(s);
-  if (isNaN(d.getTime())) return String(s);
-  return d.toLocaleString();
-}
-
-async function initHistory() {
-  if (!requireAuth()) return;
-
-  const txBody = document.getElementById("txBody");
-  const predBody = document.getElementById("predBody");
-
-  try {
-    const txs = await apiFetch("/history/transactions", { method: "GET" });
-    if (!txs.length) {
-      txBody.innerHTML = `<tr><td colspan="4" class="text-muted">Нет транзакций</td></tr>`;
-    } else {
-      txBody.innerHTML = txs.map(tx => `
-        <tr>
-          <td class="small">${escapeHtml(fmtDate(tx.created_at))}</td>
-          <td><span class="badge text-bg-dark">${escapeHtml(tx.tx_type)}</span></td>
-          <td>${tx.amount_credits}</td>
-          <td class="small"><code>${tx.task_id || ""}</code></td>
-        </tr>
-      `).join("");
-    }
-
-    const preds = await apiFetch("/history/predictions", { method: "GET" });
-    if (!preds.length) {
-      predBody.innerHTML = `<tr><td colspan="4" class="text-muted">Нет записей</td></tr>`;
-    } else {
-      predBody.innerHTML = preds.map(p => `
-        <tr>
-          <td class="small">${escapeHtml(fmtDate(p.created_at))}</td>
-          <td><span class="badge text-bg-secondary">${escapeHtml(p.status)}</span></td>
-          <td>${p.charged_credits}</td>
-          <td class="small"><code>${p.task_id}</code></td>
-        </tr>
-      `).join("");
-    }
-  } catch (err) {
-    showGlobalAlert("danger", err.code || "ERROR", err.message, err.details);
+    });
   }
-}
 
-// ---------- Boot ----------
-document.addEventListener("DOMContentLoaded", async () => {
-  const page = document.body?.dataset?.page;
+  // REGISTER
+  const regForm = $("#registerForm");
+  if (regForm) {
+    regForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#regEmail").value.trim();
+      const role = $("#regRole").value;
+      const initial_credits = Number($("#regCredits").value || 0);
 
-  if (page === "login") await initLogin();
-  if (page === "register") await initRegister();
-  if (page === "cabinet") await initCabinet();
-  if (page === "predict") await initPredict();
-  if (page === "history") await initHistory();
+      try {
+        await apiFetch("/auth/register", { method: "POST", body: { email, role, initial_credits } });
+        toast("Регистрация", "Пользователь создан. Теперь войдите.", "auth");
+        window.location.href = "/login";
+      } catch (err) {
+        toast("Ошибка регистрации", formatError(err));
+      }
+    });
+  }
+
+  // CABINET: balance + topup
+  const balanceBox = $("#balanceValue");
+  if (balanceBox) {
+    (async () => {
+      try {
+        const b = await apiFetch("/balance");
+        balanceBox.textContent = `${b.credits} credits`;
+      } catch (err) {
+        toast("Баланс недоступен", formatError(err));
+        balanceBox.textContent = "—";
+      }
+    })();
+  }
+
+  const topupForm = $("#topUpForm");
+  if (topupForm) {
+    topupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amount = Number($("#topupAmount").value);
+
+      try {
+        const r = await apiFetch("/balance/top-up", { method: "POST", body: { amount } });
+        $("#balanceValue").textContent = `${r.new_balance} credits`;
+        toast("Пополнение", `Баланс обновлён: ${r.new_balance}`, "balance");
+        $("#topupAmount").value = "50";
+      } catch (err) {
+        toast("Ошибка пополнения", formatError(err));
+      }
+    });
+  }
+
+  // PREDICT
+  const predictForm = $("#predictForm");
+  if (predictForm) {
+    predictForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const keywordsRaw = $("#keywords").value.trim();
+      const resumesRaw = $("#resumes").value;
+
+      const keywords = keywordsRaw
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const resumes = resumesRaw
+        .split("\n")
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      const top_k = Number($("#topk").value || 5);
+      const cost_credits = Number($("#cost").value || 10);
+
+      const out = $("#predictOut");
+      out.innerHTML = "";
+
+      try {
+        const r = await apiFetch("/predict", {
+          method: "POST",
+          body: { keywords, resumes, top_k, cost_credits }
+        });
+
+        const badge = `<span class="badgex"><i class="bi bi-cpu me-1"></i> status: <span class="code-pill">${r.status}</span></span>`;
+        const charged = `<span class="badgex"><i class="bi bi-coin me-1"></i> charged: <span class="code-pill">${r.charged_credits}</span></span>`;
+        const header = `<div class="d-flex flex-wrap gap-2 mb-3">${badge}${charged}</div>`;
+
+        const invalid = (r.invalid_items || []).length
+          ? `<div class="alertx p-3 mb-3">
+               <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i> Частично некорректные данные</div>
+               <div class="text-muted small mb-2">Отклонено: ${r.invalid_items.length}</div>
+               <ul class="mb-0">${r.invalid_items.map(x => `<li class="small">${x}</li>`).join("")}</ul>
+             </div>`
+          : "";
+
+        const top = (r.top || []).length
+          ? `<div class="cardx p-0">
+               <div class="cardx-header">
+                 <div class="fw-semibold">Top-${r.top.length} результаты</div>
+                 <div class="text-muted small">score ∈ [0..1]</div>
+               </div>
+               <div class="cardx-body">
+                 <div class="d-grid gap-2">
+                   ${r.top.map((it, idx) => `
+                     <div class="p-3 cardx" style="box-shadow:none">
+                       <div class="d-flex justify-content-between align-items-start gap-3">
+                         <div class="fw-semibold">#${idx+1}</div>
+                         <div class="code-pill">score: ${Number(it.score).toFixed(3)}</div>
+                       </div>
+                       <div class="hr-soft"></div>
+                       <div class="small text-muted">resume</div>
+                       <div class="mt-1" style="white-space:pre-wrap">${it.resume_text}</div>
+                     </div>
+                   `).join("")}
+                 </div>
+               </div>
+             </div>`
+          : `<div class="alertx p-3">Нет результатов.</div>`;
+
+        out.innerHTML = header + invalid + top;
+
+        // refresh balance on success (optional)
+        try {
+          const b = await apiFetch("/balance");
+          const bal = $("#balanceMini");
+          if (bal) bal.textContent = `${b.credits} credits`;
+        } catch(_) {}
+
+      } catch (err) {
+        toast("Ошибка ML-запроса", formatError(err));
+      }
+    });
+  }
+
+  // HISTORY
+  const historyRoot = $("#historyRoot");
+  if (historyRoot) {
+    (async () => {
+      try {
+        const [txs, preds] = await Promise.all([
+          apiFetch("/history/transactions"),
+          apiFetch("/history/predictions"),
+        ]);
+
+        $("#txTable").innerHTML = txs.map(t => `
+          <tr>
+            <td class="text-muted">${new Date(t.created_at).toLocaleString()}</td>
+            <td><span class="code-pill">${t.tx_type}</span></td>
+            <td>${t.amount_credits}</td>
+            <td class="text-muted">${t.task_id ?? "—"}</td>
+          </tr>
+        `).join("");
+
+        $("#predTable").innerHTML = preds.map(p => `
+          <tr>
+            <td class="text-muted">${new Date(p.created_at).toLocaleString()}</td>
+            <td class="text-muted">${p.task_id}</td>
+            <td>${p.charged_credits}</td>
+            <td><span class="code-pill">${p.status}</span></td>
+            <td class="text-muted">${(p.invalid_items || []).length ? (p.invalid_items.join(", ")) : "—"}</td>
+          </tr>
+        `).join("");
+
+      } catch (err) {
+        toast("История недоступна", formatError(err));
+      }
+    })();
+  }
 });
