@@ -85,7 +85,7 @@
 
 ---
 
-В дальнейшем все запросы выполнялись с Authorization: Bearer <d41fd020-a4e3-4922-a157-ba682bdb99d4> (через Authorize в Swagger).
+В дальнейшем все запросы выполнялись с Authorization: Bearer <корректный токен> (через Authorize в Swagger).
 
 ## B. Работа с балансом 💰
 
