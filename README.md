@@ -208,7 +208,9 @@
 
    скопировать файл app/.env.example в app/.env
 
-5. Запустить сервисы:
+   copy app\.env.example app\.env
+
+6. Запустить сервисы:
 
    docker compose up --build
 
