@@ -202,13 +202,11 @@
 1. Установить Docker и Docker Compose  
 2. Клонировать репозиторий:
 
-   git clone https://github.com/alexandersavintsev/Resume.git
+   git clone -b feature/practice-task-1 --single-branch https://github.com/alexandersavintsev/Resume.git
    
 4. Создать конфигурацию:
 
-   скопировать файл app/.env.example в app/.env
-
-   copy app\.env.example app\.env
+   скопировать файл app/.env.example в app/.env: copy app\.env.example app\.env
 
 6. Запустить сервисы:
 
