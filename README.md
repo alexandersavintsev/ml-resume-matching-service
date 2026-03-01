@@ -206,7 +206,7 @@
    
 4. Создать конфигурацию:
 
-   скопировать файл app/.env.example в app/.env: copy app\.env.example app\.env
+   copy app\.env.example app\.env
 
 6. Запустить сервисы:
 
