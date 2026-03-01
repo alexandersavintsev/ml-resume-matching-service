@@ -200,11 +200,15 @@
 ## 🚀 Быстрый запуск проекта
 
 1. Установить Docker и Docker Compose  
-2. Создать конфигурацию:
+2. Клонировать репозиторий:
+
+   git clone https://github.com/alexandersavintsev/Resume.git
+   
+4. Создать конфигурацию:
 
    скопировать файл app/.env.example в app/.env
 
-3. Запустить сервисы:
+5. Запустить сервисы:
 
    docker compose up --build
 
