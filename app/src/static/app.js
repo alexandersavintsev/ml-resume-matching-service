@@ -80,6 +80,61 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
+  // resume file upload (.txt, .pdf, .docx)
+  const resumeFilesInput = $("#resumeFiles");
+  if (resumeFilesInput) {
+    resumeFilesInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      const resumesField = $("#resumes");
+      if (!resumesField || !files.length) return;
+
+      try {
+        const formData = new FormData();
+        files.forEach(file => formData.append("files", file));
+
+        const res = await fetch("/webui/extract-resumes", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            typeof data?.detail === "string"
+              ? data.detail
+              : JSON.stringify(data?.detail || "Upload failed")
+          );
+        }
+
+        const chunks = data.resumes || [];
+        const invalid = data.invalid_files || [];
+
+        if (chunks.length) {
+          const current = resumesField.value.trim();
+          resumesField.value = current
+            ? current + "\n" + chunks.join("\n")
+            : chunks.join("\n");
+        }
+
+        if (chunks.length && invalid.length) {
+          toast("Файлы загружены", `Добавлено: ${chunks.length}, пропущено: ${invalid.length}`, "upload");
+        } else if (chunks.length) {
+          toast("Файлы загружены", `Добавлено резюме: ${chunks.length}`, "upload");
+        } else {
+          toast("Загрузка файлов", "Не удалось извлечь текст из выбранных файлов.");
+        }
+
+      } catch (err) {
+        toast("Ошибка загрузки файлов", formatError(err));
+      } finally {
+        resumeFilesInput.value = "";
+      }
+    });
+  }
+
+  
   // LOGIN
   const loginForm = $("#loginForm");
   if (loginForm) {

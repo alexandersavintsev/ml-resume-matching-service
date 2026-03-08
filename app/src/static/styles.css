@@ -196,6 +196,12 @@ body{
   color: rgba(255,255,255,.92);
   border-radius: 14px;
 }
+.form-control,
+.form-select,
+textarea,
+input {
+  color: rgba(255,255,255,.92) !important;
+}
 .form-control:focus, .form-select:focus{
   background: rgba(255,255,255,.06);
   border-color: rgba(124,92,255,.55);
@@ -205,17 +211,6 @@ body{
 
 small.text-muted, .text-muted{
   color: var(--muted2) !important;
-}
-
-.table{
-  color: rgba(255,255,255,.90);
-}
-.table thead th{
-  color: rgba(255,255,255,.70);
-  border-bottom-color: rgba(255,255,255,.10) !important;
-}
-.table td, .table th{
-  border-top-color: rgba(255,255,255,.07) !important;
 }
 
 .hr-soft{
@@ -240,4 +235,64 @@ small.text-muted, .text-muted{
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.06);
   color: rgba(255,255,255,.90);
+}
+
+/* ===== Fix dropdown/select text ===== */
+.form-select option {
+  color: #111 !important;
+  background: #fff !important;
+}
+
+/* ===== Fix toast text ===== */
+.toast {
+  color: #111 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.toast-header {
+  color: #111 !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.toast-body {
+  color: #111 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.toast .text-muted,
+.toast small {
+  color: #555 !important;
+}
+
+/* ===== Fix history tables ===== */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: transparent;
+  --bs-table-hover-bg: rgba(255,255,255,.04);
+  --bs-table-color: rgba(255,255,255,.92);
+  --bs-table-border-color: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92) !important;
+}
+
+.table th,
+.table td,
+.table thead th,
+.table tbody tr,
+.table tbody td {
+  background: transparent !important;
+  color: rgba(255,255,255,.92) !important;
+  vertical-align: middle;
+}
+
+/* ===== Fix autofill in Chrome ===== */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: rgba(255,255,255,.92) !important;
+  box-shadow: 0 0 0 1000px rgba(255,255,255,.05) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

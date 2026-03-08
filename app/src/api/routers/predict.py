@@ -1,4 +1,10 @@
+
+
 from __future__ import annotations
+
+import re
+from functools import lru_cache
+from pymorphy3 import MorphAnalyzer
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -14,15 +20,46 @@ from services.wallet_service import charge, InsufficientBalanceError
 
 router = APIRouter(prefix="/predict", tags=["predict"])
 
+TOKEN_RE = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+")
+
+@lru_cache(maxsize=1)
+def get_morph() -> MorphAnalyzer:
+    return MorphAnalyzer()
+
+
+def normalize_token(token: str) -> str:
+    token = token.strip().lower()
+    if not token:
+        return token
+
+    # Русские слова нормализуем через pymorphy3
+    if re.search(r"[а-яё]", token):
+        try:
+            return get_morph().normal_forms(token)[0]
+        except Exception:
+            return token
+
+    # Английские оставляем как есть
+    return token
+
+
+def normalize_text(text: str) -> set[str]:
+    tokens = TOKEN_RE.findall(text.lower())
+    return {normalize_token(t) for t in tokens if t.strip()}
+
 
 def _score_resume(keywords: list[str], resume_text: str) -> float:
-    # Простой baseline: доля совпавших ключевых слов (case-insensitive)
-    text = resume_text.lower()
-    if not text.strip():
+    if not resume_text.strip():
         return 0.0
-    hits = sum(1 for k in keywords if k.lower() in text)
-    return hits / max(len(keywords), 1)
 
+    normalized_keywords = [normalize_token(k) for k in keywords if k.strip()]
+    if not normalized_keywords:
+        return 0.0
+
+    resume_tokens = normalize_text(resume_text)
+
+    hits = sum(1 for k in normalized_keywords if k in resume_tokens)
+    return hits / len(normalized_keywords)
 
 @router.post("", response_model=PredictResponse)
 def predict(

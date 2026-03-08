@@ -15,12 +15,26 @@
         <form id="predictForm" class="d-grid gap-3">
           <div>
             <label class="form-label text-muted">Keywords (через запятую)</label>
-            <input id="keywords" class="form-control" placeholder="python, fastapi, sqlalchemy" required>
+            <input id="keywords" class="form-control" required>
+          </div>
+
+          <div>
+            <label class="form-label text-muted">Файлы резюме (.txt, .pdf, .docx)</label>
+            <input
+              id="resumeFiles"
+              class="form-control"
+              type="file"
+              accept=".txt,.pdf,.docx"
+              multiple
+            >
+            <div class="text-muted small mt-1">
+              Можно выбрать несколько файлов. Текст будет автоматически добавлен в поле Resumes.
+            </div>
           </div>
 
           <div>
             <label class="form-label text-muted">Resumes (по одному на строку)</label>
-            <textarea id="resumes" class="form-control" rows="7" placeholder="Resume text 1&#10;Resume text 2&#10;Resume text 3" required></textarea>
+            <textarea id="resumes" class="form-control" rows="7" required></textarea>
             <div class="text-muted small mt-1">Пустые строки будут проигнорированы.</div>
           </div>
 
@@ -62,4 +76,3 @@
   </div>
 </div>
 {% endblock %}
-
