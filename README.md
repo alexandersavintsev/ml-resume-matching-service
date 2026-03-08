@@ -250,7 +250,7 @@ git clone -b feature/practice-task-1 --single-branch https://github.com/alexande
 
 3. Создать конфигурационный файл
 
-copy app\.env.example app\.env
+`copy app\.env.example app\.env`
 
 4. Запустить сервисы
 
