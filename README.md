@@ -388,3 +388,110 @@ Docker Compose
 - контейнеризация и воспроизводимый запуск  
 
 Проект отражает базовую архитектуру ML-системы, готовой к дальнейшему развитию и масштабированию.
+
+flowchart TD
+
+%% ---------------------------
+%% CLIENT LAYER
+%% ---------------------------
+
+U[User]
+
+%% ---------------------------
+%% ENTRY POINT
+%% ---------------------------
+
+N[Nginx / Web Proxy]
+
+%% ---------------------------
+%% PRESENTATION LAYER
+%% ---------------------------
+
+W[Web UI<br>Jinja2 • Bootstrap • JS]
+
+%% ---------------------------
+%% API LAYER
+%% ---------------------------
+
+A[FastAPI Application<br>main.py]
+
+R1[Auth Router]
+R2[Balance Router]
+R3[Predict Router]
+R4[History Router]
+RW[WebUI Router]
+
+%% ---------------------------
+%% SERVICE LAYER
+%% ---------------------------
+
+S1[Wallet Service]
+S2[History Service]
+
+%% ---------------------------
+%% DATABASE
+%% ---------------------------
+
+DB[(PostgreSQL)]
+
+%% ---------------------------
+%% MESSAGE BROKER
+%% ---------------------------
+
+P[Publisher API]
+MQ[(RabbitMQ)]
+
+%% ---------------------------
+%% WORKERS
+%% ---------------------------
+
+WK1[Worker 1]
+WK2[Worker 2]
+
+ML[ML Model<br>scikit-learn]
+
+%% ---------------------------
+%% CONNECTIONS
+%% ---------------------------
+
+U --> N
+
+N --> W
+N --> A
+
+W -->|HTTP requests| A
+
+A --> R1
+A --> R2
+A --> R3
+A --> R4
+A --> RW
+
+R1 --> S1
+R2 --> S1
+R3 --> S1
+R3 --> S2
+R4 --> S1
+R4 --> S2
+
+RW --> W
+
+S1 --> DB
+S2 --> DB
+A --> DB
+
+R3 --> P
+
+P --> MQ
+P --> DB
+P --> S1
+P --> S2
+
+MQ --> WK1
+MQ --> WK2
+
+WK1 --> ML
+WK2 --> ML
+
+WK1 --> DB
+WK2 --> DB
