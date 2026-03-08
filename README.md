@@ -389,4 +389,4 @@ Docker Compose
 
 Проект отражает базовую архитектуру ML-системы, готовой к дальнейшему развитию и масштабированию.
 
-<img width="2687" height="739" alt="mermaid-diagram (1)" src="https://github.com/user-attachments/assets/2881ba56-6239-4a32-89cd-4d6fc1af7461" />
+<img width="2687" height="739" alt="mermaid-diagram (1)" src="https://github.com/user-attachments/assets/ea20c991-2bcf-4a28-8ce6-356ccf939b89" />
