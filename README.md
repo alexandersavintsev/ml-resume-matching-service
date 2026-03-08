@@ -1,191 +1,234 @@
 # 🤖 ML Resume Matching Service
 
-Учебный проект в рамках практикума по разработке ML-сервисов.
+Учебный проект в рамках практикума по разработке ML-сервисов (ML Engineering).
 
 ---
 
-## 📌 Идея проекта
+# 📌 Идея проекта
 
-Сервис подбора и ранжирования резюме под запрос работодателя по ключевым словам.  
+Сервис подбора и ранжирования резюме под запрос работодателя по ключевым словам.
+
 Пользователь формирует запрос, система выполняет baseline-matching и возвращает Top-K наиболее релевантных резюме с оценкой соответствия (score 0..1).
 
-Проект эволюционирует от объектной модели к полноценному ML-сервису с REST API, асинхронной обработкой и web-интерфейсом.
+Проект постепенно эволюционирует от объектной модели к полноценному ML-сервису с REST API, асинхронной обработкой задач и web-интерфейсом.
 
 ---
 
-## 🧩 Текущий этап разработки
+# 🧩 Этапы разработки
 
-### ✔ Practice Task 1 — Domain Model & OOP Skeleton
+## ✔ Practice Task 1 — Domain Model & OOP Skeleton
 
-Реализован этап проектирования системы:
+Реализован этап проектирования системы.
+
+Выполнено:
 
 - выделены базовые сущности предметной области  
-- применены принципы ООП:
-  - инкапсуляция  
-  - наследование  
-  - полиморфизм  
+- применены принципы ООП  
 - описаны интерфейсы взаимодействия с ML-моделью  
-- база данных, API и ML-алгоритмы были добавлены на следующих этапах
+
+Применённые принципы:
+
+- инкапсуляция  
+- наследование  
+- полиморфизм  
+
+На данном этапе база данных, API и ML-алгоритмы отсутствуют.
 
 ---
 
-### ✔ Practice Task 2 — Project Structure & Docker Compose
+## ✔ Practice Task 2 — Project Structure & Docker Compose
 
-Проект приведён к воспроизводимой сервисной архитектуре:
+Проект приведён к воспроизводимой сервисной архитектуре.
 
-- настроена структура backend-проекта  
-- описана инфраструктура через docker-compose  
-- реализовано разделение сервисов:
-  - app — backend приложение (FastAPI)
-  - publisher — API публикации ML-задач в RabbitMQ
-  - worker — независимые ML-воркеры
-  - web-proxy — Nginx reverse proxy
-  - rabbitmq — брокер сообщений
-  - database — PostgreSQL
+Настроена инфраструктура через docker-compose.
+
+Сервисы системы:
+
+- app — backend приложение (FastAPI)  
+- publisher — API публикации ML-задач  
+- worker — ML-воркеры обработки задач  
+- web-proxy — Nginx reverse proxy  
+- rabbitmq — брокер сообщений  
+- database — PostgreSQL  
+
+Особенности:
 
 - конфигурация вынесена в env-переменные  
-- данные RabbitMQ и PostgreSQL сохраняются через named volumes  
-- внешний доступ к приложению осуществляется через web-proxy
+- RabbitMQ и PostgreSQL используют named volumes  
+- доступ к приложению осуществляется через web-proxy  
 
 ---
 
-### ✔ Practice Task 3 — Database & ORM Integration
+## ✔ Practice Task 3 — Database & ORM Integration
 
-Реализовано подключение базы данных и отображение объектной модели на реляционную схему с использованием SQLAlchemy ORM.
+Реализовано подключение PostgreSQL и отображение доменной модели на реляционную схему через SQLAlchemy ORM.
 
-Выполнено:
+Созданы ORM-модели:
 
-- подключена PostgreSQL через SQLAlchemy ORM  
-- реализованы ORM-модели:
-  - users  
-  - balances  
-  - transactions  
-  - ml_models  
-  - matching_tasks  
-  - prediction_history  
-  - prediction_results  
+- users  
+- balances  
+- transactions  
+- ml_models  
+- matching_tasks  
+- prediction_history  
+- prediction_results  
 
-- настроены связи между сущностями (Foreign Keys, relationships)  
-- реализованы транзакционные операции:
-  - создание пользователя  
-  - пополнение баланса  
-  - списание кредитов  
-  - запись истории транзакций  
-  - запись истории ML-запросов  
+Реализованы:
 
-- реализован idempotent init-скрипт:
-  - демо-пользователь  
-  - демо-администратор  
-  - стартовые ML-модели  
+- связи между сущностями (Foreign Keys, relationships)  
+- транзакционные операции  
 
----
+Поддерживаются операции:
 
-### ✔ Practice Task 4 — REST API Layer (FastAPI)
+- регистрация пользователя  
+- пополнение баланса  
+- списание кредитов  
+- запись истории транзакций  
+- запись истории ML-запросов  
 
-Реализован REST API поверх сервисной логики.
-
-Выполнено:
-
-- авторизация пользователей:
-  - POST /auth/register — регистрация пользователя
-  - POST /auth/login — получение access token
-
-- пользовательские операции:
-  - GET /balance — получение текущего баланса
-  - POST /balance/top-up — пополнение баланса
-  - POST /predict — синхронный ML-запрос
-
-- история:
-  - GET /history/transactions
-  - GET /history/predictions
-
-- все эндпоинты защищены Bearer Token  
-- API протестирован через Swagger UI  
-- REST слой интегрирован с сервисным и ORM-уровнем
+Добавлен idempotent init-скрипт для инициализации базы.
 
 ---
 
-### ✔ Practice Task 5 — Async ML Processing (RabbitMQ + Workers)
+## ✔ Practice Task 4 — REST API Layer (FastAPI)
+
+Реализован REST API поверх бизнес-логики сервиса.
+
+Эндпоинты:
+
+Регистрация и авторизация:
+
+- POST /auth/register — регистрация пользователя  
+- POST /auth/login — получение access token  
+
+Баланс пользователя:
+
+- GET /balance — получение текущего баланса  
+- POST /balance/top-up — пополнение баланса  
+
+ML-операции:
+
+- POST /predict — синхронный ML-запрос  
+
+История операций:
+
+- GET /history/transactions  
+- GET /history/predictions  
+
+Все эндпоинты защищены Bearer Token.
+
+API протестирован через Swagger UI.
+
+---
+
+## ✔ Practice Task 5 — Async ML Processing (RabbitMQ + Workers)
 
 Реализована асинхронная обработка ML-задач.
 
-Выполнено:
+Архитектура:
 
-- выделен отдельный сервис publisher:
-  - POST /predict публикует задачу в RabbitMQ
-  - создаётся task в БД
-  - списываются кредиты
-  - возвращается task_id
+- publisher публикует задачи в RabbitMQ  
+- worker-сервисы получают задачи из очереди  
+- результат сохраняется в PostgreSQL  
 
-- реализованы независимые worker-сервисы:
-  - отдельный Dockerfile (Dockerfile.worker)
-  - отдельные зависимости (requirements-worker.txt)
-  - минимальный набор подключаемого кода
-  - отсутствие лишних зависимостей от app
+Publisher:
 
-- worker:
-  - получает сообщения из очереди
-  - валидирует входные данные
-  - выполняет ML-предсказание
-  - сохраняет результат через ORM
+- принимает POST /predict  
+- создаёт task в БД  
+- списывает кредиты  
+- отправляет сообщение в очередь  
 
-- используется реальная ML-модель (scikit-learn), а не mock-предикт  
-- прямые SQL-запросы заменены на ORM
+Worker:
 
----
+- читает сообщения из RabbitMQ  
+- валидирует входные данные  
+- выполняет ML-предсказание  
+- сохраняет результат через ORM  
 
-### ✔ Practice Task 6 — Web Interface (Jinja2 + Bootstrap + JS)
-
-Реализован полноценный web-интерфейс поверх существующего backend API.
-
-Выполнено:
-
-- добавлен слой Web UI на базе Jinja2 templates  
-- UI не дублирует бизнес-логику — все операции выполняются через REST API  
-- реализованы страницы:
-  - Главная (описание сервиса и быстрый старт)
-  - Регистрация
-  - Вход
-  - Личный кабинет (баланс и пополнение)
-  - ML-запрос
-  - История операций и предсказаний
-
-- реализована клиентская работа с Bearer token:
-  - хранение токена в cookies/localStorage
-  - автоматическая авторизация запросов
-  - скрытие/отображение элементов интерфейса
-
-- добавлены:
-  - обработка ошибок API
-  - toast-уведомления
-  - отображение invalid_items при частичной валидации
-
-- реализован современный AI-style дизайн:
-  - кастомная тема
-  - glassmorphism-эффекты
-  - градиентный фон
-  - улучшенная типографика
-
-- добавлена возможность загрузки резюме через файлы (.txt):
-  - файлы читаются на клиенте
-  - содержимое автоматически подставляется в форму ML-запроса
-  - backend остаётся неизменным
+Используется реальная ML-модель (scikit-learn).
 
 ---
 
-## 🏗 Архитектурная идея
+## ✔ Practice Task 6 — Web Interface (Jinja2 + Bootstrap + JS)
 
-Проект построен как ML-сервис с разделением ответственности:
+Добавлен web-интерфейс поверх существующего backend API.
+
+Особенности архитектуры:
+
+- UI не содержит бизнес-логики  
+- все операции выполняются через REST API  
+
+Реализованы страницы:
+
+- главная страница сервиса  
+- регистрация  
+- вход  
+- личный кабинет  
+- ML-запрос  
+- история операций  
+
+Клиентская авторизация:
+
+- хранение Bearer token  
+- автоматическое добавление токена в запросы  
+
+Добавлены:
+
+- обработка ошибок API  
+- toast-уведомления  
+- отображение invalid_items  
+
+Поддерживается загрузка резюме из файлов .txt.
+
+Файлы читаются на клиенте и автоматически добавляются в форму запроса.
+
+---
+
+## ✔ Practice Task 7 — System Testing (pytest)
+
+Добавлены автоматические тесты API.
+
+Тестируются основные сценарии системы:
+
+- регистрация пользователя  
+- авторизация  
+- работа с балансом  
+- пополнение баланса  
+- ML-запросы  
+- история транзакций  
+- история предсказаний  
+
+Тесты реализованы на pytest с использованием FastAPI TestClient.
+
+Структура тестов:
+
+tests  
+test_auth.py  
+test_balance.py  
+test_predict.py  
+test_history.py  
+
+Локальный результат запуска:
+
+pytest → 10 passed
+
+---
+
+# 🏗 Архитектура сервиса
+
+Система построена по принципу разделения ответственности между сервисами.
+
+Сервисы:
 
 - app — основной REST API и бизнес-логика  
-- publisher — постановка задач в очередь  
-- worker — асинхронное выполнение ML-предсказаний  
-- webui — веб-интерфейс (Jinja2 + JS)  
-- rabbitmq — транспорт сообщений  
-- database — источник истины (PostgreSQL)  
+- publisher — постановка ML-задач в очередь  
+- worker — асинхронная обработка задач  
+- webui — web-интерфейс  
+- rabbitmq — брокер сообщений  
+- database — PostgreSQL  
 - web-proxy — единая точка входа (Nginx)
 
-Ключевые доменные концепции:
+Ключевые доменные сущности:
 
 - User — пользователь системы  
 - Balance — кредиты пользователя  
@@ -193,88 +236,106 @@
 - MatchingTask — ML-задача  
 - PredictionHistory — история запросов  
 - MLModel — абстракция модели  
-- PredictionResult — результат обработки
+- PredictionResult — результат обработки  
 
 ---
 
-## 🚀 Быстрый запуск проекта
+# 🚀 Быстрый запуск проекта
 
 1. Установить Docker и Docker Compose  
-2. Клонировать репозиторий:
 
-   git clone -b feature/practice-task-1 --single-branch https://github.com/alexandersavintsev/Resume.git
-   
-4. Создать конфигурацию:
+2. Клонировать репозиторий
 
-   `copy app\.env.example app\.env`
+git clone -b feature/practice-task-1 --single-branch https://github.com/alexandersavintsev/Resume.git
 
-6. Запустить сервисы:
+3. Создать конфигурационный файл
 
-   docker compose up --build
+copy app\.env.example app\.env
 
-После запуска доступны:
+4. Запустить сервисы
 
-- Web UI: http://localhost  
-- Main API Swagger: http://localhost/docs  
-- Publisher API Swagger: http://localhost:8001/docs  
-- Health endpoint: http://localhost/health  
-- RabbitMQ UI: http://localhost:15672  
+docker compose up --build
 
 ---
 
-## 🔎 Проверка работы системы
+# 🌐 После запуска доступны
 
-### Инициализация базы данных
+Web UI  
+http://localhost  
 
-При старте приложения таблицы создаются автоматически.  
+Main API Swagger  
+http://localhost/docs  
+
+Publisher API Swagger  
+http://localhost:8001/docs  
+
+Health endpoint  
+http://localhost/health  
+
+RabbitMQ UI  
+http://localhost:15672  
+
+---
+
+# 🔎 Проверка работы системы
+
+## Инициализация базы данных
+
+При старте приложения таблицы создаются автоматически.
+
 При необходимости можно выполнить вручную:
 
 docker compose exec app python -m infra.db.init_db
 
 ---
 
-### Проверка web-интерфейса
+## Проверка web-интерфейса
 
-1. Открыть http://localhost  
-2. Зарегистрировать пользователя  
-3. Выполнить вход  
-4. Пополнить баланс  
-5. Отправить ML-запрос (ввод текста или загрузка txt-файлов)  
-6. Проверить историю операций
+1. открыть http://localhost  
+2. зарегистрировать пользователя  
+3. выполнить вход  
+4. пополнить баланс  
+5. отправить ML-запрос  
+6. проверить историю операций  
 
 ---
 
-### Проверка асинхронного пайплайна
+## Проверка асинхронного пайплайна
 
-1. Открыть Main API:
+Открыть Main API
 
 http://localhost/docs
 
-- выполнить POST /auth/register  
-- получить user_id
+Выполнить:
 
-2. Открыть Publisher API:
+POST /auth/register
+
+Получить user_id.
+
+Открыть Publisher API
 
 http://localhost:8001/docs
 
-- выполнить POST /predict
+Выполнить:
 
-3. Проверить логи worker:
+POST /predict
+
+Проверить логи worker:
 
 docker compose logs -f worker-1  
-docker compose logs -f worker-2
+docker compose logs -f worker-2  
 
 Ожидаемый результат:
 
-- worker получает сообщение
-- выполняет prediction
-- сохраняет результат в БД
+- worker получает сообщение  
+- выполняет prediction  
+- сохраняет результат в БД  
 
 ---
 
-## ⚙ Эксплуатация
+# ⚙ Эксплуатация
 
-Запуск:
+Запуск системы:
 
 docker compose up --build
 
@@ -288,38 +349,42 @@ docker compose down -v
 
 ---
 
-## 📦 Стек технологий
+# 📦 Технологический стек
 
-- Python 3.12
-- FastAPI
-- SQLAlchemy ORM
-- PostgreSQL
-- RabbitMQ
-- Pika
-- scikit-learn
-- Jinja2
-- Bootstrap 5
-- Vanilla JavaScript
-- Nginx
-- Docker / Docker Compose
+Python 3.12  
+FastAPI  
+SQLAlchemy ORM  
+PostgreSQL  
+RabbitMQ  
+Pika  
+scikit-learn  
+Jinja2  
+Bootstrap 5  
+Vanilla JavaScript  
+Nginx  
+Docker  
+Docker Compose  
 
 ---
 
-## ✨ Итог
+# ✨ Итог
 
-Проект отражает полный цикл эволюции ML-сервиса:
+Проект демонстрирует полный цикл разработки ML-сервиса:
 
 1. Domain model  
 2. Dockerized infrastructure  
 3. ORM + Database layer  
 4. REST API  
-5. Async ML pipeline with RabbitMQ and workers  
-6. Web UI поверх backend API
+5. Async ML pipeline  
+6. Web interface  
+7. System testing  
 
-Система демонстрирует базовые production-подходы:
+Реализованы основные production-подходы:
 
 - разделение ответственности между сервисами  
 - асинхронная обработка задач  
 - API-first архитектура  
 - web-интерфейс без дублирования бизнес-логики  
-- контейнеризация и воспроизводимый запуск
+- контейнеризация и воспроизводимый запуск  
+
+Проект отражает базовую архитектуру ML-системы, готовой к дальнейшему развитию и масштабированию.
