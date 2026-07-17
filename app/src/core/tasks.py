@@ -10,5 +10,17 @@ class MatchingTask(BaseEntity):
         self._query = query
         self._is_completed = False
 
+    @property
+    def user(self) -> User:
+        return self._user
+
+    @property
+    def query(self) -> JobQuery:
+        return self._query
+
+    @property
+    def is_completed(self) -> bool:
+        return self._is_completed
+
     def mark_completed(self) -> None:
         self._is_completed = True

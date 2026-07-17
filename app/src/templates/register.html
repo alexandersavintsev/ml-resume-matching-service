@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — ML Service{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="cardx">
+      <div class="cardx-body">
+        <div class="kicker mb-3"><i class="bi bi-person-plus"></i><span>Create account</span></div>
+        <h3 class="mb-2 fw-bold">Регистрация</h3>
+        <p class="text-muted mb-4">Создаём пользователя в backend. Дальше — вход и работа в кабинете.</p>
+
+        <form id="registerForm" class="row g-3">
+          <div class="col-12">
+            <label class="form-label text-muted">Email</label>
+            <input id="regEmail" class="form-control" type="email" required />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Роль</label>
+            <select id="regRole" class="form-select">
+              <option value="employer" selected>employer</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted">Начальные кредиты</label>
+            <input id="regCredits" class="form-control" type="number" min="0" max="1000000" value="0" />
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">
+              <i class="bi bi-check2-circle me-1"></i> Создать аккаунт
+            </button>
+          </div>
+        </form>
+
+        <div class="hr-soft"></div>
+        <div class="small text-muted">
+          Уже есть аккаунт? <a href="/login">Войти</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from abc import ABC
 from uuid import UUID, uuid4
+from typing import Optional
 
 
 class BaseEntity(ABC):
@@ -8,10 +9,10 @@ class BaseEntity(ABC):
     Содержит общий идентификатор.
     """
 
-    def __init__(self, entity_id: UUID | None = None):
+    def __init__(self, entity_id: Optional[UUID] = None):
         self._id: UUID = entity_id or uuid4()
 
     @property
     def id(self) -> UUID:
         return self._id
-      
+
