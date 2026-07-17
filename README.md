@@ -246,7 +246,7 @@ pytest → 10 passed
 
 2. Клонировать репозиторий
 
-git clone -b feature/practice-task-1 --single-branch https://github.com/alexandersavintsev/Resume.git
+git clone https://github.com/alexandersavintsev/Resume.git
 
 3. Создать конфигурационный файл
 
