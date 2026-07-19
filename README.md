@@ -246,7 +246,7 @@ pytest → 10 passed
 
 2. Клонировать репозиторий
 
-git clone https://github.com/alexandersavintsev/Resume.git
+git clone https://github.com/alexandersavintsev/ml-resume-matching-service.git
 
 3. Создать конфигурационный файл
 
